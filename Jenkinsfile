@@ -29,7 +29,7 @@ pipeline {
                             openshift.apply(file: 'deployment.yaml')
                             
                             // Exposer le service
-                            openshift.expose('svc/cicd')
+                            openshift.expose('svc/testapp')
                         }
                     }
                 }
