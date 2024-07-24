@@ -5,6 +5,7 @@ pipeline {
         PATH = "${env.NODE_HOME}/bin:${env.PATH}"
         NPM_CONFIG_CACHE = "${env.WORKSPACE}/.npm" // Utilisez un répertoire de cache local
     }
+    stages {
     
         stage('Install Dependencies') {
             steps {
