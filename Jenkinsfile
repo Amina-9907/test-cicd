@@ -1,37 +1,42 @@
 pipeline {
     agent any
     environment {
-        NODE_HOME = tool 'nodejs' // Assurez-vous que NodeJS est installé sur Jenkins
-        PATH = "${env.NODE_HOME}/bin:${env.PATH}"
-        NPM_CONFIG_CACHE = "${env.WORKSPACE}/.npm" // Utilisez un répertoire de cache local
-       
+        DOCKER_REGISTRY = 'your-docker-registry'
+        IMAGE_NAME = 'your-react-app'
+        TAG = 'latest'
     }
     stages {
-    
-        stage('Install Dependencies') {
+        stage('Checkout') {
             steps {
-                // Installer les dépendances de l'application React
-                sh 'npm install'
+                git 'https://github.com/fapathe/simple-node-js-react-npm-app.git'
             }
         }
-        stage('Build') {
+        stage('Build Image') {
             steps {
-                // Construire l'application React
-                sh 'npm run build'
+                script {
+                    docker.build("${env.DOCKER_REGISTRY}/${env.IMAGE_NAME}:${env.TAG}")
+                }
+            }
+        }
+        stage('Push Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'docker-credentials-id') {
+                        docker.image("${env.DOCKER_REGISTRY}/${env.IMAGE_NAME}:${env.TAG}").push()
+                    }
+                }
             }
         }
         stage('Deploy') {
             steps {
                 script {
-                    // Déployer l'application sur OpenShift
-                    sh 'oc apply -f jenkins/scripts/deployment.yaml'
+                    sh 'oc apply -f deploy/deployment.yaml'
                 }
             }
         }
         stage('Verify Deployment') {
             steps {
                 script {
-                    // Vérifier le déploiement
                     sh 'oc get pods'
                     sh 'oc get svc'
                 }
