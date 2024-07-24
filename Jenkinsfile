@@ -22,7 +22,7 @@ pipeline {
             steps {
                 script {
                     // Déployer l'application sur OpenShift
-                    sh 'oc apply -f path/to/your/deployment.yaml'
+                    sh 'oc apply -f jenkins/scripts/deployment.yaml'
                 }
             }
         }
