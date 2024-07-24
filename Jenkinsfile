@@ -1,46 +1,47 @@
 pipeline {
-    agent {
-        label 'openshift' // Assurez-vous que ce label correspond à votre configuration Jenkins sur OpenShift
-    }
+    agent any
     environment {
-        NODE_HOME = tool name: 'nodejs', type: 'NodeJSInstallation'
+        NODE_HOME = tool 'nodejs' // Assurez-vous que NodeJS est installé sur Jenkins
         PATH = "${env.NODE_HOME}/bin:${env.PATH}"
-        NPM_CONFIG_CACHE = "${env.WORKSPACE}/.npm"
+        NPM_CONFIG_CACHE = "${env.WORKSPACE}/.npm" // Utilisez un répertoire de cache local
     }
-
-    stages {
-        
-        stage('Build') { 
+    
+        stage('Install Dependencies') {
             steps {
-                sh 'npm install' 
+                // Installer les dépendances de l'application React
+                sh 'npm install'
             }
         }
-        stage('Test') {
+        stage('Build') {
             steps {
-                sh './jenkins/scripts/test.sh'
+                // Construire l'application React
+                sh 'npm run build'
             }
         }
         stage('Deploy') {
             steps {
                 script {
-                    openshift.withCluster() {
-                        openshift.withProject('aap') {
-                            // Appliquer le déploiement depuis le fichier YAML
-                            openshift.apply(file: 'deployment.yaml')
-                            
-                            // Exposer le service
-                            openshift.expose('svc/testapp')
-                        }
-                    }
+                    // Déployer l'application sur OpenShift
+                    sh 'oc apply -f path/to/your/deployment.yaml'
                 }
             }
         }
-        stage('Deliver') { 
+        stage('Verify Deployment') {
             steps {
-                sh './jenkins/scripts/deliver.sh'
-                input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                sh './jenkins/scripts/kill.sh'
+                script {
+                    // Vérifier le déploiement
+                    sh 'oc get pods'
+                    sh 'oc get svc'
+                }
             }
+        }
+    }
+    post {
+        success {
+            echo 'Déploiement réussi !'
+        }
+        failure {
+            echo 'Le déploiement a échoué.'
         }
     }
 }
