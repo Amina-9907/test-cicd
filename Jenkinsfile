@@ -1,9 +1,11 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:16'  // Spécifiez l'image Docker contenant Node.js
+            args '-v /var/run/docker.sock:/var/run/docker.sock'  // Monter le socket Docker si nécessaire
+        }
+    }
     environment {
-        DOCKER_PATH = '/usr/bin/docker'  // Mettez ici le chemin vers Docker sur votre agent
-        PATH = "${env.PATH}:${env.DOCKER_PATH}"
-        
         DOCKER_REGISTRY = 'docker.io'
         IMAGE_NAME = 'fapathe/pipeline'
         TAG = 'latest'
@@ -14,10 +16,14 @@ pipeline {
                 git 'https://github.com/fapathe/simple-node-js-react-npm-app.git'
             }
         }
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
         stage('Build Image') {
             steps {
                 script {
-                    
                     docker.build("${env.IMAGE_NAME}:${env.TAG}")
                 }
             }
