@@ -1,8 +1,8 @@
 pipeline {
     agent any
     environment {
-        DOCKER_REGISTRY = 'your-docker-registry'
-        IMAGE_NAME = 'your-react-app'
+        DOCKER_REGISTRY = 'docker.io' // ou l'URL de votre registre privé
+        IMAGE_NAME = 'fapathe/pipeline' // Remplacez 'yourusername' par votre nom d'utilisateur Docker
         TAG = 'latest'
     }
     stages {
