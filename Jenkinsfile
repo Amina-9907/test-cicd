@@ -1,8 +1,10 @@
 pipeline {
     agent any
+    tools {
+        // Utilisez le nom que vous avez donné lors de la configuration de Docker comme outil
+        docker 'docker'
+    }
     environment {
-        DOCKER_PATH = '/usr/bin/docker'  // Mettez ici le chemin vers Docker sur votre agent
-        PATH = "${env.PATH}:${env.DOCKER_PATH}"
         DOCKER_REGISTRY = 'docker.io'
         IMAGE_NAME = 'fapathe/pipeline'
         TAG = 'latest'
@@ -17,15 +19,15 @@ pipeline {
             steps {
                 script {
                     sh 'docker --version'  // Vérifiez si Docker est accessible
-                    docker.build("${env.IMAGE_NAME}:${env.TAG}")
+                    sh 'docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG} .'
                 }
             }
         }
         stage('Push Image') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'docker-credentials-id') {
-                        docker.image("${env.IMAGE_NAME}:${env.TAG}").push()
+                    withDockerRegistry([ credentialsId: 'docker-credentials-id', url: '' ]) {
+                        sh 'docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TAG}'
                     }
                 }
             }
