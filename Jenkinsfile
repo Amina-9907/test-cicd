@@ -1,16 +1,23 @@
 pipeline {
     agent any
     environment {
-        DOCKER_REGISTRY = 'docker.io' // ou l'URL de votre registre privé
-        IMAGE_NAME = 'fapathe/pipeline' // Remplacez 'yourusername' par votre nom d'utilisateur Docker
+        DOCKER_PATH = '/usr/local/bin'  // Mettez ici le chemin vers Docker sur votre agent
+        PATH = "${env.PATH}:${env.DOCKER_PATH}"
+        DOCKER_REGISTRY = 'docker.io'
+        IMAGE_NAME = 'fapathe/pipeline'
         TAG = 'latest'
     }
     stages {
-        
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/fapathe/simple-node-js-react-npm-app.git'
+            }
+        }
         stage('Build Image') {
             steps {
                 script {
-                    docker.build("${env.DOCKER_REGISTRY}/${env.IMAGE_NAME}:${env.TAG}")
+                    sh 'docker --version'  // Vérifiez si Docker est accessible
+                    docker.build("${env.IMAGE_NAME}:${env.TAG}")
                 }
             }
         }
@@ -18,7 +25,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-credentials-id') {
-                        docker.image("${env.DOCKER_REGISTRY}/${env.IMAGE_NAME}:${env.TAG}").push()
+                        docker.image("${env.IMAGE_NAME}:${env.TAG}").push()
                     }
                 }
             }
