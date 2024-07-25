@@ -1,45 +1,37 @@
 pipeline {
     agent any
     environment {
-        DOCKER_PATH = '/usr/bin/docker'  // Mettez ici le chemin vers Docker sur votre agent
-        PATH = "${env.PATH}:${env.DOCKER_PATH}"
-        DOCKER_REGISTRY = 'docker.io'
-        IMAGE_NAME = 'fapathe/pipeline'
-        TAG = 'latest'
+        NODE_HOME = tool 'nodejs' // Assurez-vous que NodeJS est installé sur Jenkins
+        PATH = "${env.NODE_HOME}/bin:${env.PATH}"
+        NPM_CONFIG_CACHE = "${env.WORKSPACE}/.npm" // Utilisez un répertoire de cache local
+       
     }
     stages {
-        stage('Checkout') {
+    
+        stage('Install Dependencies') {
             steps {
-                git 'https://github.com/fapathe/simple-node-js-react-npm-app.git'
+                // Installer les dépendances de l'application React
+                sh 'npm install'
             }
         }
-        stage('Build Image') {
+        stage('Build') {
             steps {
-                script {
-                    sh 'docker --version'  // Vérifiez si Docker est accessible
-                    docker.build("${env.IMAGE_NAME}:${env.TAG}")
-                }
-            }
-        }
-        stage('Push Image') {
-            steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'docker-credentials-id') {
-                        docker.image("${env.IMAGE_NAME}:${env.TAG}").push()
-                    }
-                }
+                // Construire l'application React
+                sh 'npm run build'
             }
         }
         stage('Deploy') {
             steps {
                 script {
-                    sh 'oc apply -f deploy/deployment.yaml'
+                    // Déployer l'application sur OpenShift
+                    sh 'oc apply -f jenkins/scripts/deployment.yaml'
                 }
             }
         }
         stage('Verify Deployment') {
             steps {
                 script {
+                    // Vérifier le déploiement
                     sh 'oc get pods'
                     sh 'oc get svc'
                 }
