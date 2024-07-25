@@ -1,8 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_PATH =  tool 'docker'  // Mettez ici le chemin vers Docker sur votre agent
-        PATH = "${env.PATH}/bin:${env.DOCKER_PATH}"
+       
         
         DOCKER_REGISTRY = 'docker.io'
         IMAGE_NAME = 'fapathe/pipeline'
