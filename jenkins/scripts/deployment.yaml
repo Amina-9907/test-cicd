@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: react-test
-        image: fapathe/pipeline:latest
+        image: docker.io/fapathe/pipeline:latest
         ports:
         - containerPort: 3000
 ---
