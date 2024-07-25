@@ -1,17 +1,23 @@
 pipeline {
     agent any
     environment {
-       
+        DOCKER_PATH =  tool 'docker'  // Mettez ici le chemin vers Docker sur votre agent
+        PATH = "${env.PATH}/bin:${env.DOCKER_PATH}"
+        
         DOCKER_REGISTRY = 'docker.io'
         IMAGE_NAME = 'fapathe/pipeline'
         TAG = 'latest'
     }
     stages {
-     
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/fapathe/simple-node-js-react-npm-app.git'
+            }
+        }
         stage('Build Image') {
             steps {
                 script {
-                    sh 'docker --version'  // Vérifiez si Docker est accessible
+                    
                     docker.build("${env.IMAGE_NAME}:${env.TAG}")
                 }
             }
