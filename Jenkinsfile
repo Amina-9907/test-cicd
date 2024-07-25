@@ -6,11 +6,7 @@ pipeline {
         TAG = 'latest'
     }
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/fapathe/simple-node-js-react-npm-app.git'
-            }
-        }
+        
         stage('Build Image') {
             steps {
                 script {
