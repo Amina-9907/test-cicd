@@ -1,0 +1,22 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: react-app
+spec:
+  replicas: 1
+  selector:
+    app: react-app
+  template:
+    metadata:
+      labels:
+        app: react-app
+    spec:
+      containers:
+        - name: react-app
+          image: docker.io/mina0423/react_project:latest
+          ports:
+            - containerPort: 80
+  triggers:
+    - type: ConfigChange
+  strategy:
+    type: Rolling
