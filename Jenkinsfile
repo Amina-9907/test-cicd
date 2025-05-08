@@ -1,49 +1,84 @@
 pipeline {
     agent any
+   
     environment {
-        NODE_HOME = tool 'nodejs' // Assurez-vous que NodeJS est installé sur Jenkins
-        PATH = "${env.NODE_HOME}/bin:${env.PATH}"
-        NPM_CONFIG_CACHE = "${env.WORKSPACE}/.npm" // Utilisez un répertoire de cache local
-       
+        APP_NAME= "react-example"
+        // SONARQUBE_URL = 'http://192.168.15.115:9000'  
+        // SONARQUBE_PROJECT_KEY = 'front'
+        // SONARQUBE_AUTH_TOKEN = credentials('sonar-credential')
     }
+
     stages {
-    
-        stage('Install Dependencies') {
+
+        stage('Install dependencies') {
             steps {
-                // Installer les dépendances de l'application React
+                echo " installer les dependances"
                 sh 'npm install'
             }
         }
+        
         stage('Build') {
             steps {
-                // Construire l'application React
+                echo " Build de l'application"
                 sh 'npm run build'
             }
         }
-        stage('Deploy') {
+
+        stage('test') {
             steps {
-                script {
-                    // Déployer l'application sur OpenShift
-                    sh 'oc apply -f jenkins/scripts/deployment.yaml'
+                echo " Execution des tests "
+                sh 'npm test'
+            }
+        }
+
+       
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    script {
+                        def scannerHome = tool 'SonarScanner'
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
                 }
             }
         }
-        stage('Verify Deployment') {
+        stage('build image Docker') {
             steps {
                 script {
-                    // Vérifier le déploiement
-                    sh 'oc get pods'
-                    sh 'oc get svc'
+                    sh 'docker build -t mina0423/react_project:v1 .'
                 }
             }
         }
-    }
-    post {
-        success {
-            echo 'Déploiement réussi !'
+        stage('push image Docker') {
+            steps {
+               withCredentials([usernamePassword(credentialsId: 'docker_registry', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    script {
+                         sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                         sh "docker push mina0423/react_project:v1"
+                    }
+               }
+            }
         }
-        failure {
-            echo 'Le déploiement a échoué.'
+
+        stage('Pull image docker') {
+            steps {
+                script {
+                    sh 'docker pull  mina0423/react_project:v1 || echo "Image non trouvée "'
+                }
+            }
+        } 
+
+        
+        stage('run container Docker') {
+            steps {
+                script {
+                    sh 'docker stop react_project || true'
+                    sh 'docker rm react_project || true'
+                    sh 'docker run -d --name react_project -p 3000:80 mina0423/react_project:v1'
+                }
+            }
         }
+               
     }
+
 }
