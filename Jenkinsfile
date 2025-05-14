@@ -66,7 +66,8 @@ pipeline {
         stage('Pull image docker') {
             steps {
                 script {
-                    sh 'docker pull  $DOCKER_USER/$IMAGE_NAME:v${env.BUILD_NUMBER} || echo "Image non trouvée "'
+                    def imageTag= "$DOCKER_USER/$IMAGE_NAME:v${env.BUILD_NUMBER}"
+                    sh 'docker pull   ${imageTag} || echo "Image non trouvée "'
                 }
             }
         } 
