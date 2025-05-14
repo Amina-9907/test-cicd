@@ -6,11 +6,14 @@ RUN npm install
 COPY . . 
 RUN npm run build
 
-FROM nginx:stable-alpine AS production
+
+FROM nginx:stable-alpine
+RUN mkdir -p /tmp/nginx-cache \
+    && chmod -R 777 /tmp/nginx-cache
+
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/nginx.conf
 
 COPY --from=builder /app/build /usr/share/nginx/html
-RUN mkdir -p /var/cache/nginx/client_temp \
-    && chown -R 1000:0 /var/cache/nginx \
-    && chmod -R 755 /var/cache/nginx
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]]
