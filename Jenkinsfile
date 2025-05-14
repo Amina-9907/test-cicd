@@ -81,7 +81,7 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'openshift-token', variable: 'TOKEN')]) {
                     sh '''
-                        oc login --token=$TOKEN --server=https://api.moncluster:6443 --insecure-skip-tls-verify
+                        oc login --token=$TOKEN --server=https://api.ocp.heritage.africa:6443 --insecure-skip-tls-verify
                         oc project $OPENSHIFT_PROJECT
                     '''
                 }
