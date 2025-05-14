@@ -4,6 +4,8 @@ pipeline {
     environment {
         APP_NAME= "react-project"
         OPENSHIFT_PROJECT = 'devops'
+        IMAGE_NAME= "react_project"
+        DOCKER_USER= "mina0423"
     }
 
     stages {
@@ -17,6 +19,7 @@ pipeline {
         
         stage('Build') {
             steps {
+                echo "${params.ENV} est là !!!!!"
                 echo " Build de l'application"
                 sh 'npm run build'
             }
@@ -43,7 +46,8 @@ pipeline {
         stage('build image Docker') {
             steps {
                 script {
-                    sh 'docker build -t mina0423/react_project:v1 .'
+                    def imageTag= "$DOCKER_USER/$IMAGE_NAME:v${env.BUILD_NUMBER}"
+                    sh 'docker build -t imageTag .'
                 }
             }
         }
@@ -51,8 +55,9 @@ pipeline {
             steps {
                withCredentials([usernamePassword(credentialsId: 'docker_registry', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     script {
+                         def imageTag= "$DOCKER_USER/$IMAGE_NAME:v${env.BUILD_NUMBER}"
                          sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-                         sh "docker push mina0423/react_project:v1"
+                         sh "docker push imageTag"
                     }
                }
             }
@@ -61,7 +66,7 @@ pipeline {
         stage('Pull image docker') {
             steps {
                 script {
-                    sh 'docker pull  mina0423/react_project:v1 || echo "Image non trouvée "'
+                    sh 'docker pull  $DOCKER_USER/$IMAGE_NAME:v${env.BUILD_NUMBER} || echo "Image non trouvée "'
                 }
             }
         } 
@@ -81,19 +86,18 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'openshift-token', variable: 'TOKEN')]) {
                     sh '''
-                        oc login --token=$TOKEN --server=https://api.ocp.heritage.africa:6443 --insecure-skip-tls-verify
+                        oc login --token=$TOKEN --server=https://api.ocp.heritage.africa:6443 
                         oc project $OPENSHIFT_PROJECT
                     '''
                 }
             }
         }
 
-         stage('Deploy') {
+         stage('Deploy to openshift') {
             steps {
-                sh '''
-                    oc project $OPENSHIFT_PROJECT
-                    oc new-app --image docker.io/mina0423/react_project:v1
-                '''
+                sh 'oc project $OPENSHIFT_PROJECT'
+                sh "sed -i 's|image: .*|image: $DOCKER_USER/$IMAGE_NAME:v${env.BUILD_NUMBER}|' deployment.yaml"
+                sh "oc apply -f deployment.yaml"
             }
         }
                
