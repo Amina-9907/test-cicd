@@ -47,7 +47,7 @@ pipeline {
             steps {
                 script {
                     def imageTag= "$DOCKER_USER/$IMAGE_NAME:v${env.BUILD_NUMBER}"
-                    sh 'docker build -t imageTag .'
+                    sh 'docker build -t ${imageTag} .'
                 }
             }
         }
@@ -57,7 +57,7 @@ pipeline {
                     script {
                          def imageTag= "$DOCKER_USER/$IMAGE_NAME:v${env.BUILD_NUMBER}"
                          sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-                         sh "docker push imageTag"
+                         sh "docker push ${imageTag}"
                     }
                }
             }
