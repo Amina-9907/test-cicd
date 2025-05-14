@@ -2,10 +2,8 @@ pipeline {
     agent any
    
     environment {
-        APP_NAME= "react-example"
-        // SONARQUBE_URL = 'http://192.168.15.115:9000'  
-        // SONARQUBE_PROJECT_KEY = 'front'
-        // SONARQUBE_AUTH_TOKEN = credentials('sonar-credential')
+        APP_NAME= "react-project"
+        OPENSHIFT_PROJECT = 'devops'
     }
 
     stages {
@@ -69,13 +67,33 @@ pipeline {
         } 
 
         
-        stage('run container Docker') {
+        // stage('run container Docker') {
+        //     steps {
+        //         script {
+        //             sh 'docker stop react_project || true'
+        //             sh 'docker rm react_project || true'
+        //             sh 'docker run -d --name react_project -p 3000:80 mina0423/react_project:v1'
+        //         }
+        //     }
+        // }
+        
+        stage('Login to OpenShift') {
             steps {
-                script {
-                    sh 'docker stop react_project || true'
-                    sh 'docker rm react_project || true'
-                    sh 'docker run -d --name react_project -p 3000:80 mina0423/react_project:v1'
+                withCredentials([string(credentialsId: 'openshift-token', variable: 'TOKEN')]) {
+                    sh '''
+                        oc login --token=$TOKEN --server=https://api.moncluster:6443 --insecure-skip-tls-verify
+                        oc project $OPENSHIFT_PROJECT
+                    '''
                 }
+            }
+        }
+
+         stage('Deploy') {
+            steps {
+                sh '''
+                    oc project OPENSHIFT_PROJECT
+                    oc new-app --name my-app https://github.com/Amina-9907/test-cicd.git
+                '''
             }
         }
                
