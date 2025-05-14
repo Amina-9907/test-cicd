@@ -92,7 +92,7 @@ pipeline {
             steps {
                 sh '''
                     oc project $OPENSHIFT_PROJECT
-                    oc new-app --name my-app https://github.com/Amina-9907/test-cicd.git
+                    oc new-app --image docker.io/mina0423/react_project:v1
                 '''
             }
         }
