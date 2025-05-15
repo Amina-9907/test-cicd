@@ -19,7 +19,7 @@ CMD ["serve", "-s", ".", "-l", "3000"]
 
 #FROM nginx:stable-alpine
 #RUN mkdir -p /tmp/nginx-cache \
-    && chmod -R 777 /tmp/nginx-cache
+#    && chmod -R 777 /tmp/nginx-cache
 
 #RUN rm /etc/nginx/conf.d/default.conf
 #COPY nginx.conf /etc/nginx/nginx.conf
