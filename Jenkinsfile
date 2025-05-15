@@ -6,6 +6,7 @@ pipeline {
         OPENSHIFT_PROJECT = 'devops'
         IMAGE_NAME= "react_project"
         DOCKER_USER= "mina0423"
+        OC_SERVER= "https://api.ocp.heritage.africa:6443"
     }
 
     stages {
@@ -87,7 +88,7 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'openshift-token', variable: 'TOKEN')]) {
                     sh '''
-                        oc login --token=$TOKEN --server=https://api.ocp.heritage.africa:6443 
+                        oc login --token=$TOKEN --server=$OC_SERVER 
                         oc project $OPENSHIFT_PROJECT
                     '''
                 }
