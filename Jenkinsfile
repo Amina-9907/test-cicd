@@ -64,14 +64,14 @@ pipeline {
             }
         }
 
-        stage('Pull image docker') {
-            steps {
-                script {
-                    def imageTag= "$DOCKER_USER/$IMAGE_NAME:v${env.BUILD_NUMBER}"
-                    sh 'docker pull   ${imageTag} || echo "Image non trouvée "'
-                }
-            }
-        } 
+        // stage('Pull image docker') {
+        //      steps {
+        //          script {
+        //              def imageTag= "$DOCKER_USER/$IMAGE_NAME:v${env.BUILD_NUMBER}"
+        //              sh 'docker pull   ${imageTag} || echo "Image non trouvée "'
+        //         }
+        //     }
+        //  } 
 
         
         // stage('run container Docker') {
