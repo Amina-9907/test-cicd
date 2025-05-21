@@ -84,20 +84,21 @@ pipeline {
         //     }
         // }
         
-        stage('Login to OpenShift') {
-            steps {
-                withCredentials([string(credentialsId: 'openshift-token', variable: 'TOKEN')]) {
-                    sh '''
-                        // oc login --token=$TOKEN --server=$OC_SERVER 
-                        oc whoami
-                        oc project $OPENSHIFT_PROJECT
-                    '''
-                }
-            }
-        }
+        // stage('Login to OpenShift') {
+        //     steps {
+        //         withCredentials([string(credentialsId: 'openshift-token', variable: 'TOKEN')]) {
+        //             sh '''
+        //                 // oc login --token=$TOKEN --server=$OC_SERVER 
+        //                
+        //                 oc project $OPENSHIFT_PROJECT
+        //             '''
+        //         }
+        //     }
+        // }
 
          stage('Deploy to openshift') {
             steps {
+                sh 'oc whoami'
                 sh 'oc project $OPENSHIFT_PROJECT'
                 sh "sed -i 's|image: .*|image: ${DOCKER_USER}/${IMAGE_NAME}:v${env.BUILD_NUMBER}|' deployment.yaml"
                 sh "oc apply -f deployment.yaml"
