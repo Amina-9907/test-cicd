@@ -88,7 +88,8 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'openshift-token', variable: 'TOKEN')]) {
                     sh '''
-                        oc login --token=$TOKEN --server=$OC_SERVER 
+                        // oc login --token=$TOKEN --server=$OC_SERVER 
+                        oc whoami
                         oc project $OPENSHIFT_PROJECT
                     '''
                 }
